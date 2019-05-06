@@ -46,14 +46,17 @@ Gem::Specification.new do |s|
   s.add_dependency(%q<lockfile>)
   s.add_dependency(%q<rails>, [">= 3.1.1"])
   s.add_dependency(%q<rturk>, [">= 2.4.0"])
+  s.add_dependency(%q<aws-sdk-mturk>, [">= 1.12.0"])
 
   s.add_development_dependency "mocha"
-  s.add_development_dependency "sqlite3"
+  s.add_development_dependency "sqlite3", "~> 1.3.10"
   s.add_development_dependency "spork"
+  s.add_development_dependency "test-unit"
+
 
   # RSpec has to be in both test and development so that rake tasks and generators
   # are available without having to explicitly switch the environment to 'test'
-  s.add_development_dependency 'factory_girl', '>= 1.3.2'
+  s.add_development_dependency 'factory_girl', '~> 4.2.0'
   s.add_development_dependency "rspec-rails", "~> 2.6"
 end
 

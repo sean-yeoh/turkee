@@ -16,6 +16,9 @@ module Turkee
 
     scope :unprocessed_hits, lambda { where('complete = ? AND sandbox = ?', false, RTurk.sandbox?) }
 
+    def self.sandbox?
+      Turkee::TurkAPI.sandbox?
+    end
     # Use this method to go out and retrieve the data for all of the posted Turk Tasks.
     #  Each specific TurkeeTask object (determined by task_type field) is in charge of
     #  accepting/rejecting the assignment and importing the data into their respective tables.
@@ -26,15 +29,16 @@ module Turkee
         Lockfile.new('/tmp/turk_processor.lock', :max_age => 3600, :retries => 10) do
 
           turks = task_items(turkee_task)
-
+          turk_api = api
           turks.each do |turk|
-            hit = RTurk::Hit.new(turk.hit_id)
+            assignments = turk_api.assignments_for_hit(turk.hit_id)
+            #hit = RTurk::Hit.new(turk.hit_id)
 
             callback_models = Set.new
-            hit.assignments.each do |assignment|
-              next unless submitted?(assignment.status)
-              next if assignment_exists?(assignment)
+            assignments.each do |assignment|
 
+              next unless submitted?(assignment.assignment_status)
+              next if assignment_exists?(assignment)
               model, param_hash = map_imported_values(assignment, turk.task_type)
               next if model.nil?
 
@@ -49,7 +53,7 @@ module Turkee
               TurkeeImportedAssignment.record_imported_assignment(assignment, result, turk)
             end
 
-            turk.set_expired?(callback_models) if !turk.set_complete?(hit, callback_models)
+            turk.set_expired?(callback_models) if !turk.set_complete?(turk.hit_id, callback_models)
           end
         end
       rescue Lockfile::MaxTriesLockError => e
@@ -70,30 +74,20 @@ module Turkee
       model = typ.to_s.constantize
       f_url = build_url(host, model, params, opts)
 
-      h = RTurk::Hit.create(:title => hit_title) do |hit|
-        hit.max_assignments = num_assignments if hit.respond_to?(:max_assignments)
-        hit.assignments = num_assignments if hit.respond_to?(:assignments)
+      h = api.create_hit(host, hit_title, hit_description, typ, num_assignments, reward, lifetime, duration, qualifications, params, opts)
 
-        hit.description = hit_description
-        hit.reward = reward
-        hit.lifetime = lifetime.to_i.days.seconds.to_i
-        hit.duration = duration.to_i.hours.seconds.to_i if duration
-        hit.question(f_url, :frame_height => HIT_FRAMEHEIGHT)
-        unless qualifications.empty?
-          qualifications.each do |key, value|
-            hit.qualifications.add key, value
-          end
-        end
-      end
-
-      TurkeeTask.create(:sandbox => RTurk.sandbox?,
+      TurkeeTask.create(:sandbox => sandbox?,
                         :hit_title => hit_title, :hit_description => hit_description,
                         :hit_reward => reward.to_f, :hit_num_assignments => num_assignments.to_i,
                         :hit_lifetime => lifetime, :hit_duration => duration,
-                        :form_url => f_url, :hit_url => h.url,
-                        :hit_id => h.id, :task_type => typ,
+                        :form_url => f_url, :hit_url => h[:hit_url],
+                        :hit_id => h[:hit_id], :task_type => typ,
                         :complete => false)
 
+    end
+
+    def self.api
+      Turkee::TurkAPI.new
     end
 
     ##########################################################################################################
@@ -102,7 +96,7 @@ module Turkee
       # Do NOT execute this function if we're in production mode
       raise "You can only clear turks in the sandbox/development environment unless you pass 'true' for the force flag." if Rails.env == 'production' && !force
 
-      hits = RTurk::Hit.all
+      hits = api.list_hits.hits
 
       logger.info "#{hits.size} reviewable hits. \n"
 
@@ -111,17 +105,18 @@ module Turkee
 
         hits.each do |hit|
           begin
-            hit.expire!
-            hit.assignments.each do |assignment|
+            api.expire_hit(hit.hit_id)
+
+            assignments_for_hit(hit.hit_id).each do |assignment|
               logger.info "Assignment status : #{assignment.status}"
-              assignment.approve!('__clear_all_turks__approved__') if assignment.status == 'Submitted'
+              api.approve_assignment(assignment.assignment_id, '__clear_all_turks__approved__') if assignment.assignment_status == 'Submitted'
             end
 
-            turkee_task = TurkeeTask.where(hit_id: hit.id).first
+            turkee_task = TurkeeTask.where(hit_id: hit.hit_id).first
             turkee_task.complete_task if turkee_task.present?
 
-            hit.dispose!
-          rescue Exception => e
+            raise "Can't dispose" #hit.dispose!
+          rescue StandardError => e
             # Probably a service unavailable
             logger.error "Exception : #{e.to_s}"
           end
@@ -135,9 +130,9 @@ module Turkee
       save!
     end
 
-    def set_complete?(hit, models)
+    def set_complete?(hit_id, models)
       if completed_assignments?
-        hit.dispose!
+        api.delete_hit(hit_id)
         complete_task
         initiate_callback(:hit_complete, models)
         return true
@@ -161,14 +156,14 @@ module Turkee
     def process_result(assignment, result)
       if result.errors.size > 0
         logger.info "Errors : #{result.inspect}"
-        assignment.reject!('Failed to enter proper data.')
+        api.reject_assignment(assignment.assignment_id, 'Failed to enter proper data.')
       elsif result.respond_to?(:approve?)
         logger.debug "Approving : #{result.inspect}"
         self.increment_complete_assignments
-        result.approve? ? assignment.approve!('') : assignment.reject!('Rejected criteria.')
+        result.approve? ? api.approve_assignment(assignment.assignment_id) : api.reject_assignment(assignment.assignment_id, 'Rejected criteria.')
       else
         self.increment_complete_assignments
-        assignment.approve!('')
+        api.approve_assignment(assignment.assignment_id)
       end
     end
 
@@ -196,7 +191,7 @@ module Turkee
     end
 
     def self.assignment_exists?(assignment)
-      TurkeeImportedAssignment.find_by_assignment_id(assignment.id).present?
+      TurkeeImportedAssignment.find_by_assignment_id(assignment.assignment_id).present?
     end
 
     def completed_assignments?

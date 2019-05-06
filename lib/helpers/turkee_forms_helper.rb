@@ -56,7 +56,7 @@ module Turkee
     # Returns the external Mechanical Turk url used to post form data based on whether RTurk is cofigured
     #   for sandbox use or not.
     def mturk_url
-      RTurk.sandbox? ? "https://workersandbox.mturk.com/mturk/externalSubmit" : "https://www.mturk.com/mturk/externalSubmit"
+      Turkee::TurkAPI.sandbox? ? "https://workersandbox.mturk.com/mturk/externalSubmit" : "https://www.mturk.com/mturk/externalSubmit"
     end
 
     # Returns whether the form fields should be disabled or not (based on the assignment_id)

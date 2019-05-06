@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'action_view'
+require 'models/turk_api'
 require 'helpers/turkee_forms_helper'
 require 'models/turkee_imported_assignment'
 require 'models/turkee_task'
