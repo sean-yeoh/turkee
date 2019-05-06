@@ -3,11 +3,11 @@ require 'spec_helper'
 describe Turkee::TurkeeFormHelper, :type => :helper do
   describe "mturk_url" do
     it "should return sandbox" do
-      RTurk.stub(:sandbox?).and_return true
+      Turkee::TurkAPI.stub(:sandbox?).and_return true
       mturk_url.should match /workersandbox.mturk.com/
     end
     it "should return production url" do
-      RTurk.stub(:sandbox?).and_return false
+      Turkee::TurkAPI.stub(:sandbox?).and_return false
       mturk_url.should match /www.mturk.com/
     end
   end
@@ -15,7 +15,7 @@ describe Turkee::TurkeeFormHelper, :type => :helper do
   describe "turkee_study" do
     before do
       @task = create(:turkee_task)
-      RTurk.stub(:sandbox?).and_return true
+      Turkee::TurkAPI.stub(:sandbox?).and_return true
 
       helper.stub(:params).and_return({:assignmentId => '123456', :workerId => '987654'})
       @study_form = helper.turkee_study
@@ -43,7 +43,7 @@ describe Turkee::TurkeeFormHelper, :type => :helper do
   describe "turkee_form_for" do
     before do
       @survey = create(:survey)
-      RTurk.stub(:sandbox?).and_return true
+      Turkee::TurkAPI.stub(:sandbox?).and_return true
 
       params = {:assignmentId => '123456', :workerId => '987654'}
       @survey_form = helper.turkee_form_for(@survey, params) do |f|

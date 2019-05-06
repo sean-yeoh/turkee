@@ -39,7 +39,6 @@ begin
     gem.homepage = "http://github.com/aantix/turkee"
     gem.authors = ["Jim Jones"]
     gem.add_dependency(%q<rails>, [">= 3.1.1"])
-    gem.add_dependency(%q<rturk>, [">= 2.4.0"])
     gem.add_dependency(%q<lockfile>, [">= 1.4.3"])
 
     gem.post_install_message = INSTALL_MESSAGE

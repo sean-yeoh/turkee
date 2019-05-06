@@ -7,13 +7,27 @@ module Turkee
   # adapted heavily from rturk
   class TurkAPI
     attr_accessor :mturk_client
+    cattr_accessor :aws_credentials, :opts
 
     def initialize
-      self.mturk_client = Aws::MTurk::Client.new(endpoint: TurkAPI.sandbox? ? 'https://mturk-requester.us-east-1.amazonaws.com' : "https://mturk-requester-sandbox.us-east-1.amazonaws.com")
+      self.mturk_client = Aws::MTurk::Client.new({
+        endpoint: TurkAPI.sandbox? ? 'https://mturk-requester.us-east-1.amazonaws.com' : "https://mturk-requester-sandbox.us-east-1.amazonaws.com",
+        credentials: aws_credentials
+      }.merge(opts.slice(:region) || {}))
+    end
+
+    def self.setup(access_key_id, secret_access_key, opts)
+      self.aws_credentials = Aws::Credentials.new(access_key_id, secret_access_key)
+      self.opts = opts
+
     end
 
     def self.sandbox?
-      Rails.env.production?
+      if opts && opts.key?(:sandbox)
+        opts[:sandbox]
+      else
+        !Rails.env.production?
+      end
     end
 
     def build_url(host, model, params, opts)

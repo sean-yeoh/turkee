@@ -46,8 +46,9 @@ describe Turkee::TurkeeTask do
   end
 
   describe ".set_complete?" do
-    before do
-      @hit = RTurk::Hit.new(123)
+    let!(:api) { stub() }
+    before(:each) do
+      Turkee::TurkeeTask.stub(:api).and_return(api)
     end
     context "completed hits" do
       before do
@@ -57,9 +58,9 @@ describe Turkee::TurkeeTask do
       end
 
       it "marks the turkee task as complete" do
-        @hit.should_receive(:dispose!).once
+        api.should_receive(:delete_hit).once
         Survey.should_receive(:hit_complete).once
-        @turkee_task.set_complete?(@hit, [Survey])
+        @turkee_task.set_complete?(123, [Survey])
         @turkee_task.complete.should be_true
       end
     end

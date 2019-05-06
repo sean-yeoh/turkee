@@ -53,7 +53,7 @@ module Turkee
       end
     end
 
-    # Returns the external Mechanical Turk url used to post form data based on whether RTurk is cofigured
+    # Returns the external Mechanical Turk url used to post form data based on whether Turk is cofigured
     #   for sandbox use or not.
     def mturk_url
       Turkee::TurkAPI.sandbox? ? "https://workersandbox.mturk.com/mturk/externalSubmit" : "https://www.mturk.com/mturk/externalSubmit"

@@ -6,7 +6,6 @@ require File.expand_path("../dummy/config/environment.rb",  __FILE__)
 require 'factory_girl'
 require 'spork'
 require 'rails/all'
-require 'rturk'
 require 'lockfile'
 #require 'active_record'
 #require 'active_support/dependencies/autoload'

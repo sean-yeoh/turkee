@@ -38,13 +38,7 @@ Once you have your account created, you can access your AWS access key and secre
 
 == CONFIGURATION
 
-Inside the config/initializers directory, you'll see the file turkee.rb.  Edit the file with your Amazon credentials.
-
-    AWSACCESSKEYID      = 'XXXXXXXXXXXXXXXXXX'
-    AWSSECRETACCESSKEY  = 'YYYYYYYYYYYYYYYYYYYYYYYYYYYY'
-
-    RTurk::logger.level     = Logger::DEBUG
-    RTurk.setup(AWSACCESSKEYID, AWSSECRETACCESSKEY, :sandbox => (Rails.env == 'production' ? false : true))
+See https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/MTurk.html
 
 Run the migrations :
 

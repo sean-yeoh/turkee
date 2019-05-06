@@ -4,5 +4,4 @@
 AWSACCESSKEYID      = 'XXXXXXXXXXXXXXXXXX'
 AWSSECRETACCESSKEY  = 'YYYYYYYYYYYYYYYYYYYYYYYYYYYY'
 
-RTurk::logger.level = Logger::DEBUG
-RTurk.setup(AWSACCESSKEYID, AWSSECRETACCESSKEY, :sandbox => (Rails.env == 'production' ? false : true))
+Turkee::TurkAPI.setup(AWSACCESSKEYID, AWSSECRETACCESSKEY, :sandbox => (Rails.env == 'production' ? false : true))

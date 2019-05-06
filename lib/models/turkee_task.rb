@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'socket'
-require 'rturk'
 require 'lockfile'
 require 'active_record'
 require "active_support/core_ext/object/to_query"
@@ -14,7 +13,7 @@ module Turkee
 
     HIT_FRAMEHEIGHT = 1000
 
-    scope :unprocessed_hits, lambda { where('complete = ? AND sandbox = ?', false, RTurk.sandbox?) }
+    scope :unprocessed_hits, lambda { where('complete = ? AND sandbox = ?', false, TurkAPI.sandbox?) }
 
     def self.sandbox?
       Turkee::TurkAPI.sandbox?
@@ -32,7 +31,6 @@ module Turkee
           turk_api = api
           turks.each do |turk|
             assignments = turk_api.assignments_for_hit(turk.hit_id)
-            #hit = RTurk::Hit.new(turk.hit_id)
 
             callback_models = Set.new
             assignments.each do |assignment|
@@ -132,7 +130,7 @@ module Turkee
 
     def set_complete?(hit_id, models)
       if completed_assignments?
-        api.delete_hit(hit_id)
+        self.class.api.delete_hit(hit_id)
         complete_task
         initiate_callback(:hit_complete, models)
         return true

@@ -6,6 +6,9 @@ describe Turkee::TurkAPI do
   let(:assignment_responses) {
     turk_api.handle_assignment_responses(aws_assignments_responses)
   }
+  before(:each) do
+    Turkee::TurkAPI.setup('key', 'pass', sandbox: true)
+  end
   it 'should respond with answers to assignments' do
     expect(assignment_responses.first.normalized_answers['response']['answer']).to eq("Pretty\n    Whiteboard Picture")
   end
