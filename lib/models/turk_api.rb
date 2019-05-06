@@ -125,6 +125,8 @@ module Turkee
         hit_id: hit_id,
         expire_at: Time.zone.now
       })
+    end
+
     def delete_hit(hit_id)
       mturk_client.delete_hit(hit_id: hit_id)
     end
