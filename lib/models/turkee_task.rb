@@ -154,14 +154,14 @@ module Turkee
     def process_result(assignment, result)
       if result.errors.size > 0
         logger.info "Errors : #{result.inspect}"
-        api.reject_assignment(assignment.assignment_id, 'Failed to enter proper data.')
+        self.class.api.reject_assignment(assignment.assignment_id, 'Failed to enter proper data.')
       elsif result.respond_to?(:approve?)
         logger.debug "Approving : #{result.inspect}"
         self.increment_complete_assignments
-        result.approve? ? api.approve_assignment(assignment.assignment_id) : api.reject_assignment(assignment.assignment_id, 'Rejected criteria.')
+        result.approve? ? self.class.api.approve_assignment(assignment.assignment_id) : self.class.api.reject_assignment(assignment.assignment_id, 'Rejected criteria.')
       else
         self.increment_complete_assignments
-        api.approve_assignment(assignment.assignment_id)
+        self.class.api.approve_assignment(assignment.assignment_id)
       end
     end
 

@@ -10,16 +10,16 @@ module Turkee
     cattr_accessor :aws_credentials, :opts
 
     def initialize
-      self.mturk_client = Aws::MTurk::Client.new({
-        endpoint: TurkAPI.sandbox? ? 'https://mturk-requester.us-east-1.amazonaws.com' : "https://mturk-requester-sandbox.us-east-1.amazonaws.com",
+      attrs = {
+        endpoint: TurkAPI.sandbox? ?  "https://mturk-requester-sandbox.us-east-1.amazonaws.com" : 'https://mturk-requester.us-east-1.amazonaws.com',
         credentials: aws_credentials
-      }.merge(opts.slice(:region) || {}))
+      }.merge(opts.slice(:region) || {})
+      self.mturk_client = Aws::MTurk::Client.new(attrs)
     end
 
     def self.setup(access_key_id, secret_access_key, opts)
       self.aws_credentials = Aws::Credentials.new(access_key_id, secret_access_key)
       self.opts = opts
-
     end
 
     def self.sandbox?
@@ -135,7 +135,7 @@ module Turkee
     delegate :create_worker_block, :notify_workers, :delete_worker_block, :list_hits, to: :mturk_client
 
     def expire_hit(hit_id)
-      api.update_expiration_for_hit({
+      mturk_client.update_expiration_for_hit({
         hit_id: hit_id,
         expire_at: Time.zone.now
       })
