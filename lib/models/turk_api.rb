@@ -12,8 +12,9 @@ module Turkee
     def initialize
       attrs = {
         endpoint: TurkAPI.sandbox? ?  "https://mturk-requester-sandbox.us-east-1.amazonaws.com" : 'https://mturk-requester.us-east-1.amazonaws.com',
-        credentials: aws_credentials
-      }.merge(opts.slice(:region) || {})
+        credentials: aws_credentials,
+        stub_responses: Rails.env.test?,
+      }.merge(opts.slice(:region, :sub_responses) || {})
       self.mturk_client = Aws::MTurk::Client.new(attrs)
     end
 
@@ -107,6 +108,7 @@ module Turkee
         <FrameHeight>#{1000}</FrameHeight>
       </ExternalQuestion>
             XML
+
       handle_create_response mturk_client.create_hit({
         max_assignments: num_assignments,
         reward: sprintf('%.2f',reward),
