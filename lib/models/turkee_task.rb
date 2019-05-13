@@ -156,9 +156,8 @@ module Turkee
         logger.info "Errors : #{result.inspect}"
         self.class.api.reject_assignment(assignment.assignment_id, 'Failed to enter proper data.')
       elsif result.respond_to?(:approve?)
-        logger.debug "Approving : #{result.inspect}"
         self.increment_complete_assignments
-        result.approve? ? self.class.api.approve_assignment(assignment.assignment_id) : self.class.api.reject_assignment(assignment.assignment_id, 'Rejected criteria.')
+        result.approve? ? self.class.api.approve_assignment(assignment.assignment_id) : self.class.api.reject_assignment(assignment.assignment_id, 'Failed to enter proper data.')
       else
         self.increment_complete_assignments
         self.class.api.approve_assignment(assignment.assignment_id)
