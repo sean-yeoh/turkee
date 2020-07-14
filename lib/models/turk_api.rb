@@ -97,6 +97,10 @@ module Turkee
       end
      end
 
+    def get_account_balance
+      mturk_client.get_account_balance.available_balance.to_f
+    end
+
      def create_hit(host, hit_title, hit_description, typ, num_assignments, reward, lifetime,
                         duration = nil, qualifications = {}, params = {}, opts = {})
       model = typ.to_s.constantize

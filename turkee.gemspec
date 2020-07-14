@@ -45,7 +45,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency(%q<lockfile>)
   s.add_dependency(%q<rails>, [">= 3.1.1"])
-  s.add_dependency(%q<aws-sdk-mturk>, [">= 1.12.0"])
+  s.add_dependency(%q<aws-sdk-mturk>, ["= 1.12.0"])
   s.add_dependency(%q<nokogiri>)
 
   s.add_development_dependency "mocha"

@@ -155,6 +155,9 @@ module Turkee
       if result.errors.size > 0
         logger.info "Errors : #{result.inspect}"
         self.class.api.reject_assignment(assignment.assignment_id, 'Failed to enter proper data.')
+      elsif result.respond_to?(:manually_approve?) && result.manually_approve?
+        # self.increment_complete_assignments
+        # nothing to do yet not sure if we should increment completed assignments yet
       elsif result.respond_to?(:approve?)
         self.increment_complete_assignments
         result.approve? ? self.class.api.approve_assignment(assignment.assignment_id) : self.class.api.reject_assignment(assignment.assignment_id, 'Failed to enter proper data.')
