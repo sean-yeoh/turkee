@@ -50,7 +50,7 @@ module Turkee
 
               TurkeeImportedAssignment.record_imported_assignment(assignment, result, turk)
             end
-
+            turk.initiate_callback(:hit_downloaded, callback_models)
             turk.set_expired?(callback_models) if !turk.set_complete?(turk.hit_id, callback_models)
           end
         end
