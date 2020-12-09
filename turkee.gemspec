@@ -44,7 +44,7 @@ Gem::Specification.new do |s|
   s.summary = %q{Turkee makes dealing with Amazon's Mechnical Turk a breeze.}
 
   s.add_dependency(%q<lockfile>)
-  s.add_dependency(%q<rails>, [">= 3.1.1"])
+  s.add_dependency(%q<rails>, [">= 6.0"])
   s.add_dependency(%q<aws-sdk-mturk>, ["= 1.12.0"])
   s.add_dependency(%q<nokogiri>)
 
